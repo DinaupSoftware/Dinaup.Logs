@@ -1,0 +1,118 @@
+name: .NET Build + Release + Package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup NuGet
+      run: dotnet nuget add source --username DinaupSoftware --password ${{ secrets.YOUR_GITHUB_PAT }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/DinaupSoftware/index.json"
+
+    - name: Restore dependencies
+      run: |
+        Get-ChildItem src/*.csproj, src/*.vbproj  | ForEach-Object { dotnet restore $_.FullName }
+      shell: pwsh
+
+
+    - name: Build
+      run: |
+        Get-ChildItem src/*.csproj, src/*.vbproj | ForEach-Object { dotnet build $_.FullName -c Release }
+      shell: pwsh
+
+    - name: Publish
+      run: |
+        Get-ChildItem src/*.csproj, src/*.vbproj  | ForEach-Object { dotnet publish $_.FullName -c Release   -o "Publish/$(Split-Path $_.Name -Leaf)" }
+      shell: pwsh
+
+    - name: Pack
+      run: |
+        Get-ChildItem src/*.csproj, src/*.vbproj  | ForEach-Object { dotnet pack $_.FullName --no-build -c Release -o nupkg }
+      shell: pwsh
+
+    - name: Publish to GitHub Packages
+      run: |
+        Get-ChildItem nupkg/*.nupkg | ForEach-Object { dotnet nuget push $_.FullName --source "https://nuget.pkg.github.com/DinaupSoftware/index.json" --api-key ${{ secrets.YOUR_GITHUB_PAT }} --skip-duplicate }
+      shell: pwsh
+
+    - name: Find Nupkg File Name
+      id: find_nupkg
+      run: |
+        $NupkgName = (Get-ChildItem nupkg/*.nupkg | Select-Object -First 1).BaseName
+        echo "NUPKG_NAME=$NupkgName" | Out-File -FilePath $Env:GITHUB_ENV -Append
+      shell: pwsh
+
+      
+    - name: Update Tag
+      if: steps.tag_version.outputs.new_tag != ''
+      run: |
+        git tag -d ${{  env.NUPKG_NAME }}
+        git tag $Env:NUPKG_NAME
+        git push origin :${{  env.NUPKG_NAME }}
+        git push origin $Env:NUPKG_NAME
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.YOUR_GITHUB_PAT }}
+
+    - name: Set Zip Name Environment Variable
+      run: |
+        echo "ZIP_NAME=${{ env.NUPKG_NAME }}.zip" | Out-File -FilePath $Env:GITHUB_ENV -Append
+      shell: pwsh
+
+
+    - name: Zip the Project
+      run: |
+          Compress-Archive -Path publish/* -DestinationPath $Env:ZIP_NAME
+      shell: pwsh
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.YOUR_GITHUB_PAT }}
+      with:
+        tag_name: ${{  env.NUPKG_NAME }}
+        release_name: Release ${{  env.NUPKG_NAME }}
+        body: 'Cambios en la versión ${{  env.NUPKG_NAME }}'
+        draft: false
+        prerelease: false
+        
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.ZIP_NAME }}
+        asset_name: ${{ env.ZIP_NAME }}
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.YOUR_GITHUB_PAT }}
+
+
+
+    - name: Configurar AWS CLI
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.S3_KEY }}
+        aws configure set aws_secret_access_key ${{ secrets.S3_SECRET }}
+        aws configure set default.region ${{ secrets.S3_REGION }}
+        aws configure set default.s3.endpoint_url ${{ secrets.S3_ENDPOINT }}
+        
+    - name: Subir archivo Zip a S3
+      run: |
+        aws s3 cp ./${{ env.ZIP_NAME }} s3://gversionesdeploy/${{ github.repository }}/${{ env.ZIP_NAME }} --endpoint-url ${{ secrets.S3_ENDPOINT }}
+      shell: pwsh
+
+
