@@ -19,57 +19,60 @@ Friend Class MatterMostSink
 
 
     Public Sub Emit(logEvent As LogEvent) Implements ILogEventSink.Emit
+        Try
 
 
-        If MatterMostWebHook <> "" AndAlso MatterMostWebHook.StartsWith("http") Then
+            If MatterMostWebHook <> "" AndAlso MatterMostWebHook.StartsWith("http") Then
 
-            If logEvent.Level = LogEventLevel.Error OrElse logEvent.Level = LogEventLevel.Fatal Then
+                If logEvent.Level = LogEventLevel.Error OrElse logEvent.Level = LogEventLevel.Fatal Then
 
-                If contadorUltimoReset < Date.UtcNow.AddSeconds(-30) Then
-                    contador = 0
-                    contadorUltimoReset = Date.UtcNow
+                    If contadorUltimoReset < Date.UtcNow.AddSeconds(-30) Then
+                        contador = 0
+                        contadorUltimoReset = Date.UtcNow
+                    End If
+
+                    contador += 1
+                    If contador > 10 Then Exit Sub
+
+
+
+
+                    Dim stringBuilder As New StringBuilder
+                    stringBuilder.AppendLine("❌ EXCEPTION ❌")
+                    stringBuilder.AppendLine("----")
+                    stringBuilder.AppendLine($"**Level:** {logEvent.Level}")
+                    stringBuilder.AppendLine($"**Timestamp:** {logEvent.Timestamp:yyyy-MM-dd HH:mm:ss}")
+                    stringBuilder.AppendLine($"**Message:** {logEvent.RenderMessage}")
+
+                    If logEvent.Exception IsNot Nothing Then
+                        stringBuilder.AppendLine($"**Exception:** {logEvent.Exception.GetType.FullName}")
+                        stringBuilder.AppendLine($"**Message:** {logEvent.Exception.Message}")
+                    End If
+
+                    ' Incluir propiedades adicionales del logEvent si son necesarias
+                    If logEvent.Properties.Count > 0 Then
+                        stringBuilder.AppendLine("**Properties:**")
+                        For Each propertyActual In logEvent.Properties
+                            stringBuilder.AppendLine("  - " & propertyActual.Key & ": " & propertyActual.Value.ToString)
+                        Next
+                    End If
+
+                    stringBuilder.AppendLine("------")
+                    If logEvent.Exception IsNot Nothing Then
+                        stringBuilder.AppendLine($"**Stack Trace:**{Environment.NewLine}```{logEvent.Exception.StackTrace}```")
+                    Else
+                        stringBuilder.AppendLine($"**Stack Trace:**{Environment.NewLine}```{Environment.StackTrace }```")
+                    End If
+
+
+
+                    Dim message = New With {.text = stringBuilder.ToString}
+                    SendToMatterMost(JsonSerializer.Serialize(message))
                 End If
 
-                contador += 1
-                If contador > 10 Then Exit Sub
-
-
-
-
-                Dim stringBuilder As New StringBuilder
-                stringBuilder.AppendLine("❌ EXCEPTION ❌")
-                stringBuilder.AppendLine("----")
-                stringBuilder.AppendLine($"**Level:** {logEvent.Level}")
-                stringBuilder.AppendLine($"**Timestamp:** {logEvent.Timestamp:yyyy-MM-dd HH:mm:ss}")
-                stringBuilder.AppendLine($"**Message:** {logEvent.RenderMessage}")
-
-                If logEvent.Exception IsNot Nothing Then
-                    stringBuilder.AppendLine($"**Exception:** {logEvent.Exception.GetType.FullName}")
-                    stringBuilder.AppendLine($"**Message:** {logEvent.Exception.Message}")
-                End If
-
-                ' Incluir propiedades adicionales del logEvent si son necesarias
-                If logEvent.Properties.Count > 0 Then
-                    stringBuilder.AppendLine("**Properties:**")
-                    For Each propertyActual In logEvent.Properties
-                        stringBuilder.AppendLine("  - " & propertyActual.Key & ": " & propertyActual.Value.ToString)
-                    Next
-                End If
-
-                stringBuilder.AppendLine("------")
-                If logEvent.Exception IsNot Nothing Then
-                    stringBuilder.AppendLine($"**Stack Trace:**{Environment.NewLine}```{logEvent.Exception.StackTrace}```")
-                Else
-                    stringBuilder.AppendLine($"**Stack Trace:**{Environment.NewLine}```{Environment.StackTrace }```")
-                End If
-
-
-
-                Dim message = New With {.text = stringBuilder.ToString}
-                SendToMatterMost(JsonSerializer.Serialize(message))
             End If
-
-        End If
+        Catch
+        End Try
     End Sub
 
 
