@@ -50,6 +50,8 @@ Public Class DinaLog
 #End If
 
 
+
+
         Dim logger As New LoggerConfiguration()
         logger.Enrich.WithProperty("Aplicacion", Aplicacion)
         logger.Enrich.WithProperty("MachineName", System.Environment.MachineName)
@@ -72,11 +74,32 @@ Public Class DinaLog
         Serilog.Log.Logger = logger.CreateLogger()
 
 
+        AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf UnhandledExceptionTrapper
+        AddHandler TaskScheduler.UnobservedTaskException, AddressOf UnobservedTaskExceptionTrapper
+
+
+
     End Sub
 
 
 
+    Private Shared Sub UnhandledExceptionTrapper(sender As Object, e As UnhandledExceptionEventArgs)
+        Try
+            Dim ex As Exception = CType(e.ExceptionObject, Exception)
+            Fatal(ex, "UnhandledException")
+        Catch exf As Exception
+        End Try
 
+    End Sub
+
+    Private Shared Sub UnobservedTaskExceptionTrapper(sender As Object, e As UnobservedTaskExceptionEventArgs)
+        Try
+            e.SetObserved()
+            Dim ex = e.Exception
+            Fatal(ex, "UnobservedTaskException")
+        Catch
+        End Try
+    End Sub
 
 
 
