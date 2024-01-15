@@ -1,8 +1,17 @@
-Imports System.Net.Http
+﻿Imports System.Net.Http
 Imports System.Text
 Imports Serilog
 Imports System.IO
+Imports Serilog.Core
+Imports Serilog.Events
+Imports System.Collections.Concurrent
+Imports System.Text.Json
+Imports System.Timers
 Public Class DinaLog
+
+
+    Private Shared _mmWebHook As String
+
 
 
     Public Shared Function ReadLog(JSON_FilePath_FileURL As String) As LogEntry()
@@ -25,13 +34,13 @@ Public Class DinaLog
             ' Si es una ruta de archivo, lee el archivo y devuelve su contenido
             Return File.ReadAllText(JsonORutaDiscoORutaHTTP, Encoding.UTF8)
         Else
-            ' Si no es una URL ni una ruta de archivo v�lida, asume que es un JSON directo
+            ' Si no es una URL ni una ruta de archivo válida, asume que es un JSON directo
             Return JsonORutaDiscoORutaHTTP
         End If
     End Function
 
 
-    Public Shared Sub Ini(Aplicacion$, Version$)
+    Public Shared Sub Ini(Aplicacion$, Version$, Optional mmWebHook$ = "")
 
 
         Dim esDebug = ""
@@ -52,6 +61,7 @@ Public Class DinaLog
         logger.Enrich.WithEnvironmentName()
         logger.Enrich.WithEnvironmentUserName()
         logger.WriteTo.Console()
+        logger.WriteTo.Sink(New MatterMostSink("https://chat.dinaup.com/hooks/znkm7yxj53ro8pqjb1xfa8da3h"))
 
 
         Dim logFilePath As String = "logs\log.txt" ' Cambia esto por la ruta de tu archivo de log
@@ -62,7 +72,8 @@ Public Class DinaLog
                     retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day
                     shared:=True)
 
-        Log.Logger = logger.CreateLogger()
+        Serilog.Log.Logger = logger.CreateLogger()
+
 
     End Sub
 
