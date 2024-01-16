@@ -3,9 +3,9 @@
   <PropertyGroup>
     <RootNamespace>DinaLog</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
-    <FileVersion>1.1.7</FileVersion>
-    <AssemblyVersion>1.1.7</AssemblyVersion>
-    <Version>1.1.7</Version>
+    <FileVersion>1.1.8</FileVersion>
+    <AssemblyVersion>1.1.8</AssemblyVersion>
+    <Version>1.1.8</Version>
   </PropertyGroup>
  
   <ItemGroup>
