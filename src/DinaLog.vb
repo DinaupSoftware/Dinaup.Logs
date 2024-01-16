@@ -63,7 +63,7 @@ Public Class DinaLog
         logger.Enrich.WithMachineName()
         logger.Enrich.WithEnvironmentName()
         logger.Enrich.WithEnvironmentUserName()
-        logger.WriteTo.Console()
+        logger.WriteTo.Console(LogEventLevel.Verbose)
         logger.WriteTo.Sink(New MatterMostSink(mmWebHook))
 
         logger.WriteTo.File(formatter:=New Serilog.Formatting.Json.JsonFormatter(), path:=logFilePath,
