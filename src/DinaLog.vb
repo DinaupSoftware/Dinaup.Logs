@@ -53,6 +53,7 @@ Public Class DinaLog
 
 
         Dim logger As New LoggerConfiguration()
+        logger.MinimumLevel.Verbose()
         logger.Enrich.WithProperty("Aplicacion", Aplicacion)
         logger.Enrich.WithProperty("MachineName", System.Environment.MachineName)
         logger.Enrich.WithProperty("Version", Version & esDebug)
