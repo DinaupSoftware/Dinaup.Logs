@@ -64,13 +64,15 @@ Public Class DinaLog
         logger.Enrich.WithEnvironmentName()
         logger.Enrich.WithEnvironmentUserName()
         logger.WriteTo.Console(LogEventLevel.Verbose)
-        logger.WriteTo.Sink(New MatterMostSink(mmWebHook))
 
+        If mmWebHook <> "" Then
+            logger.WriteTo.Sink(New MatterMostSink(mmWebHook))
+        End If
         logger.WriteTo.File(formatter:=New Serilog.Formatting.Json.JsonFormatter(), path:=logFilePath,
-                    rollingInterval:=RollingInterval.Day,
-                    fileSizeLimitBytes:=100 * 1024 * 1024, ' 100MB como ejemplo
-                    retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day
-                    shared:=True)
+                rollingInterval:=RollingInterval.Day,
+                fileSizeLimitBytes:=100 * 1024 * 1024, ' 100MB como ejemplo
+                retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day
+                shared:=True)
 
         Serilog.Log.Logger = logger.CreateLogger()
 

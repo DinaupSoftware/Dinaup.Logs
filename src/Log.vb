@@ -2,6 +2,9 @@
 
 Public Module Log
 
+    Public Sub Ini(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "")
+        DinaLog.Ini(Aplicacion, Version, logFilePath, mmWebHook)
+    End Sub
 
     Public Function IniContext(Name$, Value$) As IDisposable
         Return LogContext.PushProperty(Name, Value)
