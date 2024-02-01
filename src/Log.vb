@@ -2,8 +2,8 @@
 
 Public Module Log
 
-    Public Sub Ini(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "")
-        DinaLog.Ini(Aplicacion, Version, logFilePath, mmWebHook)
+    Public Sub Ini(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "")
+        DinaLog.Ini(Aplicacion, Version, logFilePath, mmWebHook, elasticUrl, elasticPrefix)
     End Sub
 
     Public Function IniContext(Name$, Value$) As IDisposable
@@ -31,10 +31,6 @@ Public Module Log
         Serilog.Log.Warning(log)
     End Sub
 
-
-
-
-
     Public Sub [Error](log$)
         Serilog.Log.Error(log)
     End Sub
@@ -46,6 +42,27 @@ Public Module Log
 
 
 
+
+
+    Public Sub Verbose(messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Verbose(messageTemplate, properyValues)
+    End Sub
+    Public Sub Debug(messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Debug(messageTemplate, properyValues)
+    End Sub
+    Public Sub Information(messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Information(messageTemplate, properyValues)
+    End Sub
+    Public Sub Warning(messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Warning(messageTemplate, properyValues)
+    End Sub
+
+    Public Sub [Error](messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Error(messageTemplate, properyValues)
+    End Sub
+    Public Sub Fatal(messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Fatal(messageTemplate, properyValues)
+    End Sub
 
 
 

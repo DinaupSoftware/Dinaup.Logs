@@ -7,6 +7,7 @@ Imports Serilog.Events
 Imports System.Collections.Concurrent
 Imports System.Text.Json
 Imports System.Timers
+Imports Serilog.Sinks.Elasticsearch
 Public Class DinaLog
 
 
@@ -40,7 +41,18 @@ Public Class DinaLog
     End Function
 
 
-    Public Shared Sub Ini(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "")
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="Aplicacion$"></param>
+    ''' <param name="Version$"></param>
+    ''' <param name="logFilePath$"></param>
+    ''' <param name="mmWebHook$"></param>
+    ''' <param name="elasticUrl$"></param>
+    ''' <param name="elasticPrefix$">logs.MiApp-{0:yyyy.MM}"</param>
+    Public Shared Sub Ini(Aplicacion$, Version$,
+                          Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "")
 
 
         Dim esDebug = ""
@@ -65,6 +77,10 @@ Public Class DinaLog
         logger.Enrich.WithEnvironmentUserName()
         logger.WriteTo.Console(LogEventLevel.Verbose)
 
+        If elasticUrl <> "" Then
+            If elasticPrefix = "" Then elasticPrefix = "logs." & Aplicacion.Replace(" ", "") & "-{0:yyyy.MM}"
+            logger.WriteTo.Elasticsearch(New ElasticsearchSinkOptions(New Uri(elasticUrl)) With {.IndexFormat = elasticPrefix})
+        End If
         If mmWebHook <> "" Then
             logger.WriteTo.Sink(New MatterMostSink(mmWebHook))
         End If
