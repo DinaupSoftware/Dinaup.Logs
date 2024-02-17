@@ -45,14 +45,13 @@ Public Class DinaLog
     ''' <summary>
     ''' 
     ''' </summary>
-    ''' <param name="Aplicacion$"></param>
-    ''' <param name="Version$"></param>
-    ''' <param name="logFilePath$"></param>
-    ''' <param name="mmWebHook$"></param>
-    ''' <param name="elasticUrl$"></param>
-    ''' <param name="elasticPrefix$">logs.MiApp-{0:yyyy.MM}"</param>
-    Public Shared Sub Ini(Aplicacion$, Version$,
-                          Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "")
+    ''' <param name="_aplicationName$"></param>
+    ''' <param name="_applicationVersion$"></param>
+    ''' <param name="_logFilePath$"></param>
+    ''' <param name="__mmWebHook$"></param>
+    ''' <param name="_elasticUrl$"></param>
+    ''' <param name="_elasticPrefix$">logs.MiApp-{0:yyyy.MM}"</param>
+    Public Shared Sub Initialize(_aplicationName$, _applicationVersion$, Optional _logFilePath$ = "logs\log.txt", Optional __mmWebHook$ = "", Optional _elasticUrl$ = "", Optional _elasticPrefix$ = "")
 
 
         Dim esDebug = ""
@@ -66,9 +65,9 @@ Public Class DinaLog
 
         Dim logger As New LoggerConfiguration()
         logger.MinimumLevel.Verbose()
-        logger.Enrich.WithProperty("Aplicacion", Aplicacion)
+        logger.Enrich.WithProperty("Aplicacion", _aplicationName)
         logger.Enrich.WithProperty("MachineName", System.Environment.MachineName)
-        logger.Enrich.WithProperty("Version", Version & esDebug)
+        logger.Enrich.WithProperty("Version", _applicationVersion & esDebug)
         logger.Enrich.WithThreadId()
         logger.Enrich.WithThreadName()
         logger.Enrich.FromLogContext()
@@ -77,14 +76,14 @@ Public Class DinaLog
         logger.Enrich.WithEnvironmentUserName()
         logger.WriteTo.Console(LogEventLevel.Verbose)
 
-        If elasticUrl <> "" Then
-            If elasticPrefix = "" Then elasticPrefix = "logs." & Aplicacion.Replace(" ", "") & "-{0:yyyy.MM}"
-            logger.WriteTo.Elasticsearch(New ElasticsearchSinkOptions(New Uri(elasticUrl)) With {.IndexFormat = elasticPrefix})
+        If _elasticUrl <> "" Then
+            If _elasticPrefix = "" Then _elasticPrefix = "logs." & _aplicationName.Replace(" ", "") & "-{0:yyyy.MM}"
+            logger.WriteTo.Elasticsearch(New ElasticsearchSinkOptions(New Uri(_elasticUrl)) With {.IndexFormat = _elasticPrefix})
         End If
-        If mmWebHook <> "" Then
-            logger.WriteTo.Sink(New MatterMostSink(mmWebHook))
+        If __mmWebHook <> "" Then
+            logger.WriteTo.Sink(New MatterMostSink(__mmWebHook))
         End If
-        logger.WriteTo.File(formatter:=New Serilog.Formatting.Json.JsonFormatter(), path:=logFilePath,
+        logger.WriteTo.File(formatter:=New Serilog.Formatting.Json.JsonFormatter(), path:=_logFilePath,
                 rollingInterval:=RollingInterval.Day,
                 fileSizeLimitBytes:=100 * 1024 * 1024, ' 100MB como ejemplo
                 retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day

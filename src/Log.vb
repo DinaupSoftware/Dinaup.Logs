@@ -2,8 +2,8 @@
 
 Public Module Log
 
-    Public Sub Ini(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "")
-        DinaLog.Ini(Aplicacion, Version, logFilePath, mmWebHook, elasticUrl, elasticPrefix)
+    Public Sub Initialize(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "")
+        DinaLog.Initialize(Aplicacion, Version, logFilePath, mmWebHook, elasticUrl, elasticPrefix)
     End Sub
 
     Public Function IniContext(Name$, Value$) As IDisposable
