@@ -73,6 +73,12 @@ Public Module Log
 
 
 
+    Public Function ForContext(Of t)() As Serilog.ILogger
+        Return Serilog.Log.ForContext(Of t)
+    End Function
+
+
+
 
 
     Public Sub Verbose(ex As Exception, log$)
@@ -95,4 +101,34 @@ Public Module Log
     Public Sub [Error](ex As Exception, log$)
         Serilog.Log.Error(ex, log)
     End Sub
+
+
+
+
+
+    Public Sub Verbose(ex As Exception, log$, messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Verbose(ex, log, messageTemplate, properyValues)
+    End Sub
+    Public Sub Debug(ex As Exception, log$, messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Debug(ex, log, messageTemplate, properyValues)
+    End Sub
+    Public Sub Information(ex As Exception, log$, messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Information(ex, log, messageTemplate, properyValues)
+    End Sub
+    Public Sub Warning(ex As Exception, log$, messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Warning(ex, log, messageTemplate, properyValues)
+    End Sub
+
+    Public Sub Fatal(ex As Exception, log$, messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Fatal(ex, log, messageTemplate, properyValues)
+    End Sub
+
+    Public Sub [Error](ex As Exception, log$, messageTemplate$, ParamArray properyValues() As Object)
+        Serilog.Log.Error(ex, log, messageTemplate, properyValues)
+    End Sub
+
+
+
+
+
 End Module
