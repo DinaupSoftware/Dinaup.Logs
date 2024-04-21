@@ -3,9 +3,9 @@
   <PropertyGroup>
     <RootNamespace>Dinaup.Logs</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
-    <FileVersion>1.1.13</FileVersion>
-    <AssemblyVersion>1.1.13</AssemblyVersion>
-    <Version>1.1.13</Version>
+    <FileVersion>1.1.14</FileVersion>
+    <AssemblyVersion>1.1.14</AssemblyVersion>
+    <Version>1.1.14</Version>
   </PropertyGroup>
 
   <ItemGroup>
