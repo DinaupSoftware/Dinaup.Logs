@@ -1,6 +1,13 @@
-﻿Imports Serilog.Context
+﻿Imports Dinaup.Logs.LogContextSchema
+Imports Serilog.Context
+Imports Serilog.Events
 
 Public Module Log
+
+
+    Public Sub SetLoggingLevel(x As LogEventLevel)
+        DinaLog.LevelSwitch.MinimumLevel = x
+    End Sub
 
     Public Sub Initialize(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "")
         DinaLog.Initialize(Aplicacion, Version, logFilePath, mmWebHook, elasticUrl, elasticPrefix)
@@ -14,6 +21,13 @@ Public Module Log
         Return LogContext.PushProperty("Context", Context)
     End Function
 
+
+    Public Function BeginContext(component$, action$, correlationId$) As LogContextDisposer
+        Dim componentContext As IDisposable = LogContext.PushProperty("Component", component)
+        Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
+        Dim correlationContext As IDisposable = LogContext.PushProperty("CorrelationId", correlationId)
+        Return New LogContextDisposer(componentContext, actionContext, correlationContext)
+    End Function
     Public Sub CloseAndFlush()
         Serilog.Log.CloseAndFlush()
     End Sub

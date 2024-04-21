@@ -8,7 +8,7 @@ Imports System.Collections.Concurrent
 Imports System.Text.Json
 Imports System.Timers
 Imports Serilog.Sinks.Elasticsearch
-Public Class DinaLog
+Friend Class DinaLog
 
 
     Private Shared _mmWebHook As String
@@ -42,6 +42,13 @@ Public Class DinaLog
 
 
 
+    Public Shared LevelSwitch As New LoggingLevelSwitch(LogEventLevel.Information)
+
+
+    Public Shared Sub SetLoggingLevel(x As LogEventLevel)
+        LevelSwitch.MinimumLevel = x
+    End Sub
+
     ''' <summary>
     ''' 
     ''' </summary>
@@ -62,9 +69,8 @@ Public Class DinaLog
 
 
 
-
         Dim logger As New LoggerConfiguration()
-        logger.MinimumLevel.Verbose()
+        logger.MinimumLevel.ControlledBy(LevelSwitch)
         logger.Enrich.WithProperty("Aplicacion", _aplicationName)
         logger.Enrich.WithProperty("MachineName", System.Environment.MachineName)
         logger.Enrich.WithProperty("Version", _applicationVersion & esDebug)
