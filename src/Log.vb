@@ -21,7 +21,11 @@ Public Module Log
         Return LogContext.PushProperty("Context", Context)
     End Function
 
-
+    Public Function BeginContext(component$, action$) As LogContextDisposer
+        Dim componentContext As IDisposable = LogContext.PushProperty("Component", component)
+        Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
+        Return New LogContextDisposer(componentContext, actionContext)
+    End Function
     Public Function BeginContext(component$, action$, correlationId$) As LogContextDisposer
         Dim componentContext As IDisposable = LogContext.PushProperty("Component", component)
         Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)

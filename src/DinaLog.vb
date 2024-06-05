@@ -8,6 +8,9 @@ Imports System.Collections.Concurrent
 Imports System.Text.Json
 Imports System.Timers
 Imports Serilog.Sinks.Elasticsearch
+Imports System.Net
+Imports System.Net.Security
+Imports System.Security.Cryptography.X509Certificates
 Friend Class DinaLog
 
 
@@ -82,10 +85,19 @@ Friend Class DinaLog
         logger.Enrich.WithEnvironmentUserName()
         logger.WriteTo.Console(LogEventLevel.Verbose)
 
+        ' Configuración de Elasticsearch con buffering
         If _elasticUrl <> "" Then
             If _elasticPrefix = "" Then _elasticPrefix = "logs." & _aplicationName.Replace(" ", "") & "-{0:yyyy.MM}"
-            logger.WriteTo.Elasticsearch(New ElasticsearchSinkOptions(New Uri(_elasticUrl)) With {.IndexFormat = _elasticPrefix})
+            logger.WriteTo.Elasticsearch(New ElasticsearchSinkOptions(New Uri(_elasticUrl)) With {
+            .IndexFormat = _elasticPrefix,
+            .BatchPostingLimit = 1000, ' Número máximo de eventos a enviar en un lote
+            .BufferBaseFilename = "buffer-logs", ' Archivo de buffer para almacenar registros temporalmente
+            .BufferFileSizeLimitBytes = 50 * 1024 * 1024, ' Tamaño máximo del archivo de buffer (50 MB)
+            .BufferLogShippingInterval = TimeSpan.FromSeconds(5) ' Intervalo de tiempo para enviar los registros en buffer
+        })
         End If
+
+
         If __mmWebHook <> "" Then
             logger.WriteTo.Sink(New MatterMostSink(__mmWebHook))
         End If
@@ -94,6 +106,18 @@ Friend Class DinaLog
                 fileSizeLimitBytes:=100 * 1024 * 1024, ' 100MB como ejemplo
                 retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day
                 shared:=True)
+
+        '    ' Configuración del archivo de logs con buffering
+        '    logger.WriteTo.File(
+        '    formatter:=New Serilog.Formatting.Json.JsonFormatter(),
+        '    path:=_logFilePath,
+        '    rollingInterval:=RollingInterval.Day,
+        '    fileSizeLimitBytes:=100 * 1024 * 1024, ' 100 MB como ejemplo
+        '    retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day
+        '    shared:=True,
+        '    buffered:=True, ' Habilitar buffer
+        '    flushToDiskInterval:=TimeSpan.FromSeconds(3) ' Intervalo de tiempo para enviar los registros en buffer
+        ')
 
         Serilog.Log.Logger = logger.CreateLogger()
 

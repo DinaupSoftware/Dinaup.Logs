@@ -44,6 +44,10 @@ Public Class LogContextSchema
         Private _componentContext As IDisposable
         Private _actionContext As IDisposable
         Private _correlationContext As IDisposable
+        Public Sub New(componentContext As IDisposable, actionContext As IDisposable)
+            _componentContext = componentContext
+            _actionContext = actionContext
+        End Sub
 
         Public Sub New(componentContext As IDisposable, actionContext As IDisposable, correlationContext As IDisposable)
             _componentContext = componentContext
