@@ -87,14 +87,23 @@ Friend Class DinaLog
 
         ' Configuración de Elasticsearch con buffering
         If _elasticUrl <> "" Then
+
+            Dim bufferLogs = "buffer-logs"
+#If DEBUG Then
+            bufferLogs = Nothing
+#End If
+
             If _elasticPrefix = "" Then _elasticPrefix = "logs." & _aplicationName.Replace(" ", "") & "-{0:yyyy.MM}"
             logger.WriteTo.Elasticsearch(New ElasticsearchSinkOptions(New Uri(_elasticUrl)) With {
             .IndexFormat = _elasticPrefix,
             .BatchPostingLimit = 1000, ' Número máximo de eventos a enviar en un lote
-            .BufferBaseFilename = "buffer-logs", ' Archivo de buffer para almacenar registros temporalmente
+            .BufferBaseFilename = bufferLogs, ' Archivo de buffer para almacenar registros temporalmente
             .BufferFileSizeLimitBytes = 50 * 1024 * 1024, ' Tamaño máximo del archivo de buffer (50 MB)
             .BufferLogShippingInterval = TimeSpan.FromSeconds(5) ' Intervalo de tiempo para enviar los registros en buffer
         })
+
+
+
         End If
 
 
