@@ -26,12 +26,14 @@ Public Module Log
         Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
         Return New LogContextDisposer(componentContext, actionContext)
     End Function
-    Public Function BeginContext(component$, action$, correlationId$) As LogContextDisposer
+    Public Function BeginCorrelationContext(component$, action$, correlationId$) As LogContextDisposer
         Dim componentContext As IDisposable = LogContext.PushProperty("Component", component)
         Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
         Dim correlationContext As IDisposable = LogContext.PushProperty("CorrelationId", correlationId)
         Return New LogContextDisposer(componentContext, actionContext, correlationContext)
     End Function
+
+
     Public Sub CloseAndFlush()
         Serilog.Log.CloseAndFlush()
     End Sub
