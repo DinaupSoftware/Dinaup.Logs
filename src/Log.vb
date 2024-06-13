@@ -1,4 +1,5 @@
-﻿Imports Dinaup.Logs.LogContextSchema
+﻿Imports System.Linq
+Imports Dinaup.Logs.LogContextSchema
 Imports Serilog.Context
 Imports Serilog.Events
 
@@ -148,7 +149,60 @@ Public Module Log
     End Sub
 
 
+    Public Sub ValidateParameter(param As Guid, paramName As String)
+        If param = Guid.Empty Then
+            Dinaup.Logs.Log.Error("El parámetro '{ParamName}' no puede ser empty.", paramName)
+            Throw New ArgumentNullException(paramName, $"El parámetro '{paramName}' no puede ser empty.")
+        End If
+    End Sub
 
+
+    Public Sub ValidateParameter(Of T)(param As T, paramName As String)
+        If param Is Nothing Then
+            Dinaup.Logs.Log.Error("El parámetro '{ParamName}' no puede ser nulo.", paramName)
+            Throw New ArgumentNullException(paramName, $"El parámetro '{paramName}' no puede ser nulo.")
+        End If
+    End Sub
+
+    Public Sub ValidateParameter(param As String, paramName As String)
+        If String.IsNullOrWhiteSpace(param) Then
+            Dinaup.Logs.Log.Error("El parámetro '{ParamName}' no puede ser nulo o vacío.", paramName)
+            Throw New ArgumentException($"El parámetro '{paramName}' no puede ser nulo o vacío.", paramName)
+        End If
+    End Sub
+
+    Public Sub ValidateParameter(param As IEnumerable, paramName As String, maxitems As Integer)
+
+
+        Dim cantidad As Integer = 0
+        If param IsNot Nothing Then
+            For Each actual In param
+                cantidad += 1
+            Next
+        End If
+
+        If param Is Nothing OrElse cantidad = 0 Then
+            Dinaup.Logs.Log.Error("El parámetro '{ParamName}' no puede ser nulo o vacío.", paramName)
+            Throw New ArgumentException($"El parámetro '{paramName}' no puede ser nulo o vacío.", paramName)
+        ElseIf maxitems < cantidad Then
+            Dinaup.Logs.Log.Error("El parámetro '{ParamName}' no puede contener más de {maxitems} elementos.", paramName, maxitems)
+            Throw New ArgumentException($"El parámetro '{paramName}' no puede contener más de {maxitems} elementos.")
+        End If
+    End Sub
+    Public Sub ValidateParameter(param As IEnumerable, paramName As String)
+        Dim cantidad As Integer = 0
+        If param IsNot Nothing Then
+            For Each actual In param
+                cantidad += 1
+            Next
+        End If
+
+
+        If param Is Nothing OrElse cantidad = 0 Then
+            Dinaup.Logs.Log.Error("El parámetro '{ParamName}' no puede ser nulo o vacío.", paramName)
+            Throw New ArgumentException($"El parámetro '{paramName}' no puede ser nulo o vacío.", paramName)
+        End If
+    End Sub
 
 
 End Module
