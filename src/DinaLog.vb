@@ -52,17 +52,44 @@ Friend Class DinaLog
         LevelSwitch.MinimumLevel = x
     End Sub
 
+
+    Private Shared elasticSearchURL$
+
+    Public Shared Async Function ElasticSearchIsAvailable() As Task(Of Boolean)
+        Using httpClient As New HttpClient()
+            Try
+                ' Set a timeout for the request
+                httpClient.Timeout = TimeSpan.FromSeconds(5)
+
+                ' Send a GET request to the Elasticsearch URL
+                Dim response As HttpResponseMessage = Await httpClient.GetAsync(elasticSearchURL)
+
+                ' Return true if the response status code is 200 (OK)
+                Return response.IsSuccessStatusCode
+            Catch ex As HttpRequestException
+                ' Handle request exceptions (e.g., network issues)
+                Return False
+            Catch ex As TaskCanceledException
+                ' Handle timeout exceptions
+                Return False
+            End Try
+        End Using
+    End Function
+
+
+
     ''' <summary>
     ''' 
     ''' </summary>
     ''' <param name="_aplicationName$"></param>
     ''' <param name="_applicationVersion$"></param>
     ''' <param name="_logFilePath$"></param>
-    ''' <param name="__mmWebHook$"></param>
+    ''' <param name="_mattermostWebHook$"></param>
     ''' <param name="_elasticUrl$"></param>
     ''' <param name="_elasticPrefix$">logs.MiApp-{0:yyyy.MM}"</param>
-    Public Shared Sub Initialize(_aplicationName$, _applicationVersion$, Optional _logFilePath$ = "logs\log.txt", Optional __mmWebHook$ = "", Optional _elasticUrl$ = "", Optional _elasticPrefix$ = "")
+    Public Shared Sub Initialize(_aplicationName$, _applicationVersion$, Optional _logFilePath$ = "logs\log.txt", Optional _mattermostWebHook$ = "", Optional _elasticUrl$ = "", Optional _elasticPrefix$ = "")
 
+        elasticSearchURL = _elasticUrl
 
         Dim esDebug = ""
 
@@ -107,8 +134,8 @@ Friend Class DinaLog
         End If
 
 
-        If __mmWebHook <> "" Then
-            logger.WriteTo.Sink(New MatterMostSink(__mmWebHook))
+        If _mattermostWebHook <> "" Then
+            logger.WriteTo.Sink(New MatterMostSink(_mattermostWebHook))
         End If
         logger.WriteTo.File(formatter:=New Serilog.Formatting.Json.JsonFormatter(), path:=_logFilePath,
                 rollingInterval:=RollingInterval.Day,

@@ -5,6 +5,9 @@ Imports Serilog.Events
 
 Public Module Log
 
+    Public Async Function ElasticSearchIsAvailableAsync() As Task(Of Boolean)
+        Return Await DinaLog.ElasticSearchIsAvailable
+    End Function
 
     Public Sub SetLoggingLevel(x As LogEventLevel)
         DinaLog.LevelSwitch.MinimumLevel = x
@@ -32,6 +35,13 @@ Public Module Log
         Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
         Dim correlationContext As IDisposable = LogContext.PushProperty("CorrelationId", correlationId)
         Return New LogContextDisposer(componentContext, actionContext, correlationContext)
+    End Function
+    Public Function BeginCorrelationContextWithDetaiils(component$, action$, correlationId$, Details As Object) As LogContextDisposer
+        Dim componentContext As IDisposable = LogContext.PushProperty("Component", component)
+        Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
+        Dim correlationContext As IDisposable = LogContext.PushProperty("CorrelationId", correlationId)
+        Dim Detailsx As IDisposable = LogContext.PushProperty("Context", Details)
+        Return New LogContextDisposer(componentContext, actionContext, correlationContext, Detailsx)
     End Function
 
 

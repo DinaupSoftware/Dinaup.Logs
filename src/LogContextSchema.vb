@@ -41,25 +41,20 @@ Public Class LogContextSchema
     Public Class LogContextDisposer
         Implements IDisposable
 
-        Private _componentContext As IDisposable
-        Private _actionContext As IDisposable
-        Private _correlationContext As IDisposable
-        Public Sub New(componentContext As IDisposable, actionContext As IDisposable)
-            _componentContext = componentContext
-            _actionContext = actionContext
+        Private _componentContext() As IDisposable
+        Public Sub New(ParamArray disposablelist() As IDisposable)
+            _componentContext = disposablelist
         End Sub
-
-        Public Sub New(componentContext As IDisposable, actionContext As IDisposable, correlationContext As IDisposable)
-            _componentContext = componentContext
-            _actionContext = actionContext
-            _correlationContext = correlationContext
-        End Sub
-
         Private Sub Dispose(disposing As Boolean)
             If disposing Then
-                _componentContext?.Dispose()
-                _actionContext?.Dispose()
-                _correlationContext?.Dispose()
+                If _componentContext IsNot Nothing Then
+                    If _componentContext.Length > 0 Then
+                        For i = 0 To _componentContext.Length - 1
+                            _componentContext(i).Dispose()
+                        Next
+                    End If
+                End If
+                _componentContext = Nothing
             End If
         End Sub
 
