@@ -54,26 +54,16 @@ Friend Class DinaLog
 
 
     Private Shared elasticSearchURL$
-
+    Private Shared httpClient As New HttpClient() With {.Timeout = TimeSpan.FromSeconds(5)}
     Public Shared Async Function ElasticSearchIsAvailable() As Task(Of Boolean)
-        Using httpClient As New HttpClient()
-            Try
-                ' Set a timeout for the request
-                httpClient.Timeout = TimeSpan.FromSeconds(5)
-
-                ' Send a GET request to the Elasticsearch URL
-                Dim response As HttpResponseMessage = Await httpClient.GetAsync(elasticSearchURL)
-
-                ' Return true if the response status code is 200 (OK)
-                Return response.IsSuccessStatusCode
-            Catch ex As HttpRequestException
-                ' Handle request exceptions (e.g., network issues)
-                Return False
-            Catch ex As TaskCanceledException
-                ' Handle timeout exceptions
-                Return False
-            End Try
-        End Using
+        Try
+            Dim response As HttpResponseMessage = Await httpClient.GetAsync(elasticSearchURL)
+            Return response.IsSuccessStatusCode
+        Catch ex As HttpRequestException
+            Return False
+        Catch ex As TaskCanceledException
+            Return False
+        End Try
     End Function
 
 
@@ -87,7 +77,7 @@ Friend Class DinaLog
     ''' <param name="_mattermostWebHook$"></param>
     ''' <param name="_elasticUrl$"></param>
     ''' <param name="_elasticPrefix$">logs.MiApp-{0:yyyy.MM}"</param>
-    Public Shared Sub Initialize(_aplicationName$, _applicationVersion$, Optional _logFilePath$ = "logs\log.txt", Optional _mattermostWebHook$ = "", Optional _elasticUrl$ = "", Optional _elasticPrefix$ = "")
+    Public Shared Sub Initialize(_aplicationName$, _applicationVersion$, Optional _logFilePath$ = "logs\log.txt", Optional _mattermostWebHook$ = "", Optional _elasticUrl$ = "", Optional _elasticPrefix$ = "", Optional _enviroment As String = "Release")
 
         elasticSearchURL = _elasticUrl
 
@@ -98,12 +88,18 @@ Friend Class DinaLog
 #End If
 
 
+        Dim ElasticLogs = New ElasticsearchSinkOptions(New Uri(_elasticUrl)) With {.IndexFormat = "logs." & _aplicationName.Replace(" ", "") & "-{0:yyyy.MM}-" & _enviroment.ToLower}
+        Dim ElasticMetric = New ElasticsearchSinkOptions(New Uri(_elasticUrl)) With {.IndexFormat = "metrics." & _aplicationName.Replace(" ", "") & "-{0:yyyy.MM}-" & _enviroment.ToLower}
+
 
         Dim logger As New LoggerConfiguration()
         logger.MinimumLevel.ControlledBy(LevelSwitch)
         logger.Enrich.WithProperty("Aplicacion", _aplicationName)
         logger.Enrich.WithProperty("MachineName", System.Environment.MachineName)
         logger.Enrich.WithProperty("Version", _applicationVersion & esDebug)
+        logger.Enrich.WithProperty("Environment", _enviroment)
+
+
         logger.Enrich.WithThreadId()
         logger.Enrich.WithThreadName()
         logger.Enrich.FromLogContext()
@@ -111,6 +107,15 @@ Friend Class DinaLog
         logger.Enrich.WithEnvironmentName()
         logger.Enrich.WithEnvironmentUserName()
         logger.WriteTo.Console(LogEventLevel.Verbose)
+
+        logger.WriteTo.Logger(Sub(lc)
+                                  lc.Filter.ByIncludingOnly(Function(e) e.Properties.ContainsKey("MetricName")).WriteTo.Elasticsearch(ElasticMetric)
+                              End Sub)
+
+        logger.WriteTo.Logger(Sub(lc)
+                                  lc.Filter.ByExcluding(Function(e) e.Properties.ContainsKey("MetricName")).WriteTo.Elasticsearch(ElasticLogs)
+                              End Sub)
+
 
         ' Configuración de Elasticsearch con buffering
         If _elasticUrl <> "" Then
@@ -120,7 +125,7 @@ Friend Class DinaLog
             bufferLogs = Nothing
 #End If
 
-            If _elasticPrefix = "" Then _elasticPrefix = "logs." & _aplicationName.Replace(" ", "") & "-{0:yyyy.MM}"
+            If _elasticPrefix = "" Then _elasticPrefix = "logs." & _aplicationName.Replace(" ", "") & "-{0:yyyy.MM}-" & _enviroment.ToLower
             logger.WriteTo.Elasticsearch(New ElasticsearchSinkOptions(New Uri(_elasticUrl)) With {
             .IndexFormat = _elasticPrefix,
             .BatchPostingLimit = 1000, ' Número máximo de eventos a enviar en un lote
@@ -137,23 +142,13 @@ Friend Class DinaLog
         If _mattermostWebHook <> "" Then
             logger.WriteTo.Sink(New MatterMostSink(_mattermostWebHook))
         End If
+
         logger.WriteTo.File(formatter:=New Serilog.Formatting.Json.JsonFormatter(), path:=_logFilePath,
                 rollingInterval:=RollingInterval.Day,
                 fileSizeLimitBytes:=100 * 1024 * 1024, ' 100MB como ejemplo
                 retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day
                 shared:=True)
 
-        '    ' Configuración del archivo de logs con buffering
-        '    logger.WriteTo.File(
-        '    formatter:=New Serilog.Formatting.Json.JsonFormatter(),
-        '    path:=_logFilePath,
-        '    rollingInterval:=RollingInterval.Day,
-        '    fileSizeLimitBytes:=100 * 1024 * 1024, ' 100 MB como ejemplo
-        '    retainedFileCountLimit:=7, ' Mantener solo 7 archivos (una semana) si se usa RollingInterval.Day
-        '    shared:=True,
-        '    buffered:=True, ' Habilitar buffer
-        '    flushToDiskInterval:=TimeSpan.FromSeconds(3) ' Intervalo de tiempo para enviar los registros en buffer
-        ')
 
         Serilog.Log.Logger = logger.CreateLogger()
 

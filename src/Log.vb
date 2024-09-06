@@ -13,8 +13,8 @@ Public Module Log
         DinaLog.LevelSwitch.MinimumLevel = x
     End Sub
 
-    Public Sub Initialize(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "")
-        DinaLog.Initialize(Aplicacion, Version, logFilePath, mmWebHook, elasticUrl, elasticPrefix)
+    Public Sub Initialize(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "", Optional enviroment As String = "Release")
+        DinaLog.Initialize(Aplicacion, Version, logFilePath, mmWebHook, elasticUrl, elasticPrefix, enviroment)
     End Sub
 
     Public Function IniContext(Name$, Value$) As IDisposable
@@ -44,6 +44,12 @@ Public Module Log
         Return New LogContextDisposer(componentContext, actionContext, correlationContext, Detailsx)
     End Function
 
+    Public Sub SendMetrics()
+
+
+
+
+    End Sub
 
     Public Sub CloseAndFlush()
         Serilog.Log.CloseAndFlush()
@@ -72,6 +78,11 @@ Public Module Log
 
 
 
+
+    Public Sub LogMetric(metricName As String, value As Decimal, Optional unit As String = "count")
+        Dim log = New With {.MetricName = metricName, .Value = value, .Unit = unit, .Timestamp = DateTime.UtcNow}
+        Serilog.Log.Information("Metric {@Metric}", log)
+    End Sub
 
 
 
