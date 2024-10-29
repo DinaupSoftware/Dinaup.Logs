@@ -5,6 +5,25 @@ Imports Serilog.Events
 
 Public Module Log
 
+    Public Class ElasticConfig
+        Public Property Endpoint As String
+        Public Property Username As String
+        Public Property Password As String
+        Public Property IndexPrefix As String
+    End Class
+
+    Public Class IntegrationsConfig
+        Public Property MattermostWebhook As String
+        Public Property TeamsWebhook As String
+    End Class
+
+
+
+    Public Sub Initialize(applicationName As String, applicationVersion As String, elasticConfig As ElasticConfig, Optional integrationsConfig As IntegrationsConfig = Nothing, Optional logFilePath As String = "logs\log.txt", Optional environment As String = "Release")
+        DinaLog.Initialize(applicationName, applicationVersion, logFilePath, elasticConfig, integrationsConfig, environment)
+    End Sub
+
+
     Public Async Function ElasticSearchIsAvailableAsync() As Task(Of Boolean)
         Return Await DinaLog.ElasticSearchIsAvailable
     End Function
@@ -13,9 +32,6 @@ Public Module Log
         DinaLog.LevelSwitch.MinimumLevel = x
     End Sub
 
-    Public Sub Initialize(Aplicacion$, Version$, Optional logFilePath$ = "logs\log.txt", Optional mmWebHook$ = "", Optional elasticUrl$ = "", Optional elasticPrefix$ = "", Optional enviroment As String = "Release")
-        DinaLog.Initialize(Aplicacion, Version, logFilePath, mmWebHook, elasticUrl, elasticPrefix, enviroment)
-    End Sub
 
     Public Function IniContext(Name$, Value$) As IDisposable
         Return LogContext.PushProperty(Name, Value)
@@ -44,12 +60,12 @@ Public Module Log
         Return New LogContextDisposer(componentContext, actionContext, correlationContext, Detailsx)
     End Function
 
-    Public Sub SendMetrics()
+    'Public Sub SendMetrics()
 
 
 
 
-    End Sub
+    'End Sub
 
     Public Sub CloseAndFlush()
         Serilog.Log.CloseAndFlush()
@@ -78,11 +94,6 @@ Public Module Log
 
 
 
-
-    Public Sub LogMetric(metricName As String, value As Decimal, Optional unit As String = "count")
-        Dim log = New With {.MetricName = metricName, .Value = value, .Unit = unit, .Timestamp = DateTime.UtcNow}
-        Serilog.Log.Information("Metric {@Metric}", log)
-    End Sub
 
 
 

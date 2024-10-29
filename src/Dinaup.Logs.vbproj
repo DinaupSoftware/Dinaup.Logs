@@ -3,29 +3,43 @@
   <PropertyGroup>
     <RootNamespace>Dinaup.Logs</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
-    <FileVersion>1.1.14</FileVersion>
-    <AssemblyVersion>1.1.14</AssemblyVersion>
-    <Version>1.1.14</Version>
+    <FileVersion>2.0.2</FileVersion>
+    <AssemblyVersion>2.0.2</AssemblyVersion>
+    <Version>2.0.2</Version>
+    <PackageId>Dinaup.Logs</PackageId>
+    <Authors>Dinaup</Authors> <!-- Tu nombre y tu empresa -->
+    <Company>Dinaup Software SL</Company> <!-- Empresa Dinaup -->
+    <Description>Paquete de logs optimizado para el ecosistema Dinaup utilizando Serilog con sinks para Elasticsearch, consola y archivo.</Description> <!-- Descripción personalizada -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression> <!-- Licencia MIT -->
+    <PackageProjectUrl>https://dinaup.com/</PackageProjectUrl> <!-- URL de Dinaup como proyecto -->
+    <PackageIcon>icono.png</PackageIcon> <!-- Si tienes un icono, puedes usar esta línea -->
+    <RepositoryType>git</RepositoryType> <!-- Tipo de repositorio (git) -->
+    <RepositoryUrl>https://github.com/DinaupSoftware/Dinaup.Logs.git</RepositoryUrl> <!-- URL del repositorio -->
+    <Tags>dinaup;logging;serilog;elasticsearch;console;file</Tags> <!-- Etiquetas relevantes -->
     <OptionStrict>On</OptionStrict>
     <Configurations>Debug;Release;Main;LiveTest;Dev</Configurations>
+    <Platforms>AnyCPU;x64</Platforms>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Dinaup.Logs</Title>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Logger\**" />
     <EmbeddedResource Remove="Logger\**" />
     <None Remove="Logger\**" />
+    <None Include="icono.png" Pack="true" PackagePath="\" />
   </ItemGroup>
  
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="3.1.1" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+    <PackageReference Include="Serilog" Version="4.1.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-    <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 
 </Project>

@@ -1,12 +1,16 @@
 
 Module Program
     Sub Main(args As String())
+
+
+
+
         ' Configuración de Serilog
-        dinaup.logs.Initialize("LogTest", "0.1", logFilePath:="log/log.txt", mmWebHook:="matte", elasticUrl:="http://localhost:9200", elasticPrefix:="")
+        Dinaup.Logs.Initialize("LogTest", "0.1", logFilePath:="log/log.txt", mmWebHook:="matte", elasticUrl:="http://localhost:9200", elasticPrefix:="")
 
 
         ' Generar logs de prueba
-        dinaup.logs.Information("Iniciando pruebas de Serilog.")
+        Dinaup.Logs.Information("Iniciando pruebas de Serilog.")
 
         ' Llamadas a funciones de prueba
         GenerarLogsTexto()
@@ -14,13 +18,13 @@ Module Program
         GenerarLogsExcepciones()
 
 
-        Using dinaup.logs.IniContext("sync")
-            dinaup.logs.Log.Information("Log de texto número {NumeroLog}", 2)
+        Using Dinaup.Logs.IniContext("sync")
+            Dinaup.Logs.Log.Information("Log de texto número {NumeroLog}", 2)
         End Using
 
 
-        dinaup.logs.Log.Information("Pruebas de Serilog finalizadas.")
-        dinaup.logs.CloseAndFlush()
+        Dinaup.Logs.Log.Information("Pruebas de Serilog finalizadas.")
+        Dinaup.Logs.CloseAndFlush()
         Console.ReadKey()
 
     End Sub
