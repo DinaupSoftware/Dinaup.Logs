@@ -81,7 +81,7 @@ Public Class MetricExporter
 
 
         ' Si hay métricas para enviar
-        If _metricsCollection.Count > 0 Then
+        If metricsToSend.Count > 0 Then
 
             ' Preparar el payload para Bulk API de Elasticsearch
             Dim bulkPayload As New StringBuilder()

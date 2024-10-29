@@ -3,9 +3,9 @@
   <PropertyGroup>
     <RootNamespace>Dinaup.Logs</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
-    <FileVersion>2.0.2</FileVersion>
-    <AssemblyVersion>2.0.2</AssemblyVersion>
-    <Version>2.0.2</Version>
+    <FileVersion>2.0.3</FileVersion>
+    <AssemblyVersion>2.0.3</AssemblyVersion>
+    <Version>2.0.3</Version>
     <PackageId>Dinaup.Logs</PackageId>
     <Authors>Dinaup</Authors> <!-- Tu nombre y tu empresa -->
     <Company>Dinaup Software SL</Company> <!-- Empresa Dinaup -->
@@ -27,6 +27,7 @@
     <Compile Remove="Logger\**" />
     <EmbeddedResource Remove="Logger\**" />
     <None Remove="Logger\**" />
+    <Content Include="ico.ico" />
     <None Include="icono.png" Pack="true" PackagePath="\" />
   </ItemGroup>
  
