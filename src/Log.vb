@@ -17,9 +17,16 @@ Public Module Log
         Public Property TeamsWebhook As String
     End Class
 
+    Public AutoExportContextMetric As Boolean
 
 
-    Public Sub Initialize(applicationName As String, applicationVersion As String, elasticConfig As ElasticConfig, Optional integrationsConfig As IntegrationsConfig = Nothing, Optional logFilePath As String = "logs\log.txt", Optional environment As String = "Release")
+
+    Public Sub Initialize(applicationName As String,
+                          applicationVersion As String,
+                          elasticConfig As ElasticConfig,
+                          Optional integrationsConfig As IntegrationsConfig = Nothing,
+                          Optional logFilePath As String = "logs\log.txt", Optional environment As String = "Release", Optional autoExportContextMetric As Boolean = False)
+        autoExportContextMetric = autoExportContextMetric
         DinaLog.Initialize(applicationName, applicationVersion, logFilePath, elasticConfig, integrationsConfig, environment)
     End Sub
 
@@ -33,7 +40,19 @@ Public Module Log
     End Sub
 
 
+    Private metricCounter_Context As New Concurrent.ConcurrentDictionary(Of String, CounterMetric)
+
+    Private Function GetCounter(component As String, action As String) As CounterMetric
+        Dim keyx = component & "-" & action
+        Return metricCounter_Context.GetOrAdd(keyx, Function() New CounterMetric("context_action", "hit", 0, New Dictionary(Of String, String) From {{"component", component}, {"action", action}}))
+    End Function
+
+
+
     Public Function IniContext(Name$, Value$) As IDisposable
+
+
+
         Return LogContext.PushProperty(Name, Value)
     End Function
 
@@ -44,12 +63,30 @@ Public Module Log
     Public Function BeginContext(component$, action$) As LogContextDisposer
         Dim componentContext As IDisposable = LogContext.PushProperty("Component", component)
         Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
+        If AutoExportContextMetric Then
+            Try
+                Dim counter = GetCounter(component, action)
+                counter.Increment()
+            Catch
+            End Try
+        End If
+
         Return New LogContextDisposer(componentContext, actionContext)
     End Function
     Public Function BeginCorrelationContext(component$, action$, correlationId$) As LogContextDisposer
         Dim componentContext As IDisposable = LogContext.PushProperty("Component", component)
         Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
         Dim correlationContext As IDisposable = LogContext.PushProperty("CorrelationId", correlationId)
+
+
+        If AutoExportContextMetric Then
+            Try
+                Dim counter = GetCounter(component, action)
+                counter.Increment()
+            Catch
+            End Try
+        End If
+
         Return New LogContextDisposer(componentContext, actionContext, correlationContext)
     End Function
     Public Function BeginCorrelationContextWithDetaiils(component$, action$, correlationId$, Details As Object) As LogContextDisposer
@@ -57,6 +94,16 @@ Public Module Log
         Dim actionContext As IDisposable = LogContext.PushProperty("Action", action)
         Dim correlationContext As IDisposable = LogContext.PushProperty("CorrelationId", correlationId)
         Dim Detailsx As IDisposable = LogContext.PushProperty("Context", Details)
+
+
+        If AutoExportContextMetric Then
+            Try
+                Dim counter = GetCounter(component, action)
+                counter.Increment()
+            Catch
+            End Try
+        End If
+
         Return New LogContextDisposer(componentContext, actionContext, correlationContext, Detailsx)
     End Function
 
