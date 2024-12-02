@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <RootNamespace>Dinaup.Logs</RootNamespace>
-    <TargetFramework>net8.0</TargetFramework>
-    <FileVersion>2.0.4</FileVersion>
-    <AssemblyVersion>2.0.4</AssemblyVersion>
-    <Version>2.0.4</Version>
+    <TargetFramework>net9.0</TargetFramework>
+    <FileVersion>9.0.0.0</FileVersion>
+    <AssemblyVersion>9.0.0.0</AssemblyVersion>
+    <Version>9.0.0.0</Version>
     <PackageId>Dinaup.Logs</PackageId>
     <Authors>Dinaup</Authors> <!-- Tu nombre y tu empresa -->
     <Company>Dinaup Software SL</Company> <!-- Empresa Dinaup -->
@@ -21,6 +21,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Dinaup.Logs</Title>
+    <OptionExplicit>On</OptionExplicit>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,7 +38,7 @@
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-    <PackageReference Include="Serilog.Sinks.Async" Version="2.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
